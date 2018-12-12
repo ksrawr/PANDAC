@@ -1,0 +1,7 @@
+1. Initialize pthread arrays for Producers and Consumers 
+(their length's such be the user inputted items for Producers and the calculated length of items for Consumers)
+2. Create these pthreads, each calling their respective function Produce and Consume. First create the pthreads for Producers then create the pthreads for Consumers.
+3. In the Producer function, use a bounded buffer to load items and pthread synchronization to produce the appropriate amount of items for that thread
+4. In the Consumer function, use a bounded buffer and wait for it empty. then use pthread synchronization to produce the appropriate amount of items for that thread.
+5. Join the threads.
+6. Compare the arrays to see if the items produced for Pthreads of Producers and Consumers are identical. 
