@@ -88,7 +88,7 @@ void produce(int * tid) {
 		pthread_mutex_lock(&mutexlock);
 		//printf("\npthread id: %d items: %d iterator: %d", pt_info.id, pt_info.items, i);
 		producerData[++numItemsAll - 1] = numItemsAll;
-		printf("\n%d was produced by producer-> %d", enqueue_item(numItemsAll, &buffer), *tid);
+		printf("\n\t%d was produced by producer-> %d", enqueue_item(numItemsAll, &buffer), *tid);
 		i++;
 		sleep(Ptime);
 		// in = (in + 1) % numBuffer;
@@ -102,28 +102,28 @@ void produce(int * tid) {
 	pthread_exit(0);
 }
 
-// void consume(int * id) {
-// 	int i = 0;
-// 	int item = 0;
-// 	while ( i < consumerItems ) {
-// 		sem_wait(&full);
-// 		pthread_mutex_lock(&mutexlock);
-// 		// while( counter == 0 ) pthread_cond_wait(&full, &mutexlock);
-// 		// in = (in - 1) % numBuffer;
-// 		// out = (out + 1) % BUFFER_SIZE;
-// 		// counter--;
-// 		// printf("\nconsume in buffer: %d", in);
-// 		item = dequeue_item(&buffer);
-// 		consumerData[++consumerItemsAll - 1] = item;
-// 		printf("\n%d was consumed by consumer-> %d", item, * tid);
-// 		i++;
-// 		sleep(Ctime);
-// 		// buffer[in] = 0;
-// 		pthread_mutex_unlock(&mutexlock);
-// 		sem_post(&empty);
-// 	} 
-// 	pthread_exit(0);
-// }
+void consume(int * tid) {
+	int i = 0;
+	int item = 0;
+	while ( i < consumerItems ) {
+		sem_wait(&full);
+		pthread_mutex_lock(&mutexlock);
+		// while( counter == 0 ) pthread_cond_wait(&full, &mutexlock);
+		// in = (in - 1) % numBuffer;
+		// out = (out + 1) % BUFFER_SIZE;
+		// counter--;
+		// printf("\nconsume in buffer: %d", in);
+		item = dequeue_item(&buffer);
+		consumerData[++consumerItemsAll - 1] = item;
+		printf("\n\t%d was consumed by consumer-> %d", item, * tid);
+		i++;
+		sleep(Ctime);
+		// buffer[in] = 0;
+		pthread_mutex_unlock(&mutexlock);
+		sem_post(&empty);
+	} 
+	pthread_exit(0);
+}
 
 int main(int argc, char** argv) {
 
@@ -184,20 +184,26 @@ int main(int argc, char** argv) {
 	for (i = 0; i < numProducer; i++) {
 		// pt_info[i].id = i;
 		// pt_info[i].items = 0; // Note: items are not produced yet!
-		pthread_create(&producers[i], &attr, (void*)produce, &producerData[i]);
+		pthread_create(&producers[i], &attr, (void*)produce, &producerInfo[i]);
 	}
 
-	// for (i = 0; i < numConsumer; i++) {
-	// 	pthread_create(&consumers[i], &attr, consume, NULL);
-	// }
+	for (i = 0; i < numConsumer; i++) {
+		pthread_create(&consumers[i], &attr, (void*)consume, &consumerInfo[i]);
+	}
 
 	for (i = 0; i < numProducer; i++) {
-		pthread_join(producers[i], NULL);
+		if(pthread_join(producers[i], NULL) != 0) {
+			printf("\nProducer thread join failed\n");
+		}
+		printf("\nProducer Thread joined: %d", producerInfo[i]);
 	}
 
-	// for( i = 0; i < numConsumer; i++) {
-	// 	pthread_join(consumers[i], NULL);
-	// }
+	for( i = 0; i < numConsumer; i++) {
+		if(pthread_join(consumers[i], NULL) != 0) {
+			printf("\nConsumer thread join failed\n");
+		}
+		printf("\nConsumer Thread joined: %d", consumerInfo[i]);
+	}
 
 	time_t time_end;
 	time(&time_end);
